@@ -2,18 +2,22 @@ package simplify.fwm.jibberjabber.activities;
 
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.AppCompatEditText;
+import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.firebase.client.AuthData;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import butterknife.Bind;
@@ -26,15 +30,17 @@ import simplify.fwm.jibberjabber.data.User;
  */
 public class SignupActivity extends AppCompatActivity {
 
-    @Bind(R.id.signup_firstname)AppCompatEditText _firstName;
-    @Bind(R.id.signup_lastname)AppCompatEditText _lastName;
+    @Bind(R.id.signup_firstname) AppCompatEditText _fName;
+    @Bind(R.id.signup_lastname) AppCompatEditText _lName;
     @Bind(R.id.signup_email)AppCompatEditText _email;
-    @Bind(R.id.signup_user_name)AppCompatEditText _userName;
+    @Bind(R.id.signup_user_name) AppCompatEditText _userName;
     @Bind(R.id.signup_password)AppCompatEditText _password;
     @Bind(R.id.signup_button)AppCompatButton _signupButton;
     @Bind(R.id.signup_login) TextView _loginLink;
 
-    Firebase ref = new Firebase("https://jibber-jabber.firebaseio.com/");
+    private Firebase ref = new Firebase("https://jibber-jabber.firebaseio.com/");
+    private static final String TAG = "SignupActivity";
+    private User user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,25 +56,26 @@ public class SignupActivity extends AppCompatActivity {
     public boolean validate(){
         boolean isValid = true;
 
-        String fName = _firstName.getText().toString();
-        String lName = _lastName.getText().toString();
+        String fName = _fName.getText().toString();
+        String lName = _lName.getText().toString();
         String email = _email.getText().toString();
+        String userName = _userName.getText().toString();
         String password = _password.getText().toString();
 
         if(fName.isEmpty() || fName.length()<2){
-            _firstName.setError("Please enter valid name");
+            _fName.setError("Enter a name");
             isValid = false;
         }
         else{
-            _firstName.setError(null);
+            _fName.setError(null);
         }
 
-        if(lName.isEmpty() || lName.length()<2){
-            _lastName.setError("Please Enter valid name");
+        if(lName.isEmpty()){
+            _lName.setError("Enter a name");
             isValid = false;
         }
         else{
-            _lastName.setError(null);
+            _lName.setError(null);
         }
 
         if(email.isEmpty() || !Patterns.EMAIL_ADDRESS.matcher(email).matches()){
@@ -79,12 +86,23 @@ public class SignupActivity extends AppCompatActivity {
             _email.setError(null);
         }
 
+        if(userName.isEmpty()){
+            _userName.setError("Enter a username");
+            isValid = false;
+        }
+        else {
+            _userName.setError(null);
+        }
+
         if(password.isEmpty() || password.length() < 6 || password.length() >15){
             _password.setError("Between 6 and 12 alphanumeric characters");
+            isValid = false;
         }
         else{
             _password.setError(null);
         }
+
+
 
         return isValid;
     }
@@ -103,36 +121,30 @@ public class SignupActivity extends AppCompatActivity {
         progressDialog.setMessage("Signing Up....");
         progressDialog.show();
 
-        String fName = _firstName.getText().toString();
-        String lName = _lastName.getText().toString();
+
         String email = _email.getText().toString();
-        String userName = _userName.getText().toString();
         String password = _password.getText().toString();
-        final User user = new User(fName,lName,email,userName,password);
-        Firebase userDB = ref.child("users");
 
 
         ref.createUser(email, password, new Firebase.ValueResultHandler<Map<String, Object>>() {
             @Override
             public void onSuccess(Map<String, Object> result) {
-                result.put("displayName",user.getUserName());
-                result.put("firstName",user.getFirstName());
-                result.put("lastName",user.getLastName());
+                
                 new android.os.Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {
-
-                        signupSuccess();
                         progressDialog.dismiss();
+                        signupSuccess();
+
                     }
-                },2000);
-                Toast.makeText(getApplicationContext(), "Created User with username: " + result.get("displayName"),Toast.LENGTH_LONG).show();
+                }, 1500);
             }
 
             @Override
             public void onError(FirebaseError firebaseError) {
-                Toast.makeText(getApplicationContext(),firebaseError.getMessage(),Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), firebaseError.getMessage(), Toast.LENGTH_LONG).show();
                 progressDialog.dismiss();
+                signupFailed();
             }
         });
     }
@@ -157,7 +169,26 @@ public class SignupActivity extends AppCompatActivity {
     }
 
     public void signupSuccess(){
+        ref.authWithPassword(_email.getText().toString(), _password.getText().toString(), new Firebase.AuthResultHandler() {
+            @Override
+            public void onAuthenticated(AuthData authData) {
+                Map<String,String> map = new HashMap<String, String>();
+                map.put("email",_email.getText().toString());
+                map.put("firstName",_fName.getText().toString());
+                map.put("lastName",_lName.getText().toString());
+                map.put("userName",_userName.getText().toString());
+                ref.child("users").child(authData.getUid()).setValue(map);
+                startActivity(new Intent(getBaseContext(),MainActivity.class));
+                finish();
+            }
 
+            @Override
+            public void onAuthenticationError(FirebaseError firebaseError) {
+                Log.d(TAG,firebaseError.getMessage());
+            }
+        });
     }
+
+
 }
 

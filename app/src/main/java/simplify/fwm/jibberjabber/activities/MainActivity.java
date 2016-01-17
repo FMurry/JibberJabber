@@ -7,6 +7,7 @@ import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -14,19 +15,27 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.firebase.client.AuthData;
+import com.firebase.client.DataSnapshot;
+import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
+import com.firebase.client.ValueEventListener;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import simplify.fwm.jibberjabber.R;
+import simplify.fwm.jibberjabber.data.User;
 
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
-    private static final String FIREBASE_REF = "https://jibber-jabber.firebaseio.com/";
+    private final Firebase ref = new Firebase("https://jibber-jabber.firebaseio.com/");
 
     @Bind(R.id.toolbar)Toolbar toolbar;
     @Bind(R.id.main_add)FloatingActionButton _addButton;
-    @Bind(R.id.main_recycler_view)RecyclerView _recycler;
 
     private RecyclerView.LayoutManager rvLayout;
     private RecyclerView.Adapter rvAdapter;
@@ -38,15 +47,36 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
         toolbar.setTitle("Jibber Jabber");
-        setSupportActionBar(toolbar);
-        _recycler.setHasFixedSize(true);
+        //_recycler.setHasFixedSize(true);
         rvLayout = new LinearLayoutManager(this);
-        _recycler.setLayoutManager(rvLayout);
+        //_recycler.setLayoutManager(rvLayout);
 
-        if(isConnected()){
-            startActivity(new Intent(this, LoginActivity.class));
+        if(ref.getAuth()==null){
+            startActivity(new Intent(this,LoginActivity.class));
+            finish();
         }
+        else{
+            final Firebase userNode = ref.child("users").child(ref.getAuth().getUid()).child("userName");
+            userNode.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    String name = (String)dataSnapshot.getValue();
+                    toolbar.setTitle(name);
+                }
 
+                @Override
+                public void onCancelled(FirebaseError firebaseError) {
+
+                }
+            });
+        }
+        setSupportActionBar(toolbar);
+        _addButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(getBaseContext(),"Hello",Toast.LENGTH_LONG).show();
+            }
+        });
 
     }
 
@@ -70,6 +100,18 @@ public class MainActivity extends AppCompatActivity {
             return true;
         }
 
+        if (id == R.id.action_logout){
+            ref.unauth();
+            recreate();
+            return true;
+        }
+
+        if (id == R.id.action_change_username){
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            ChangeUserDialog changeUserDialog = new ChangeUserDialog();
+            changeUserDialog.show(fragmentManager,"fragment_change_username");
+        }
+
         return super.onOptionsItemSelected(item);
     }
 
@@ -83,5 +125,9 @@ public class MainActivity extends AppCompatActivity {
         NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
         boolean connected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
         return connected;
+    }
+
+    public void reload(){
+
     }
 }

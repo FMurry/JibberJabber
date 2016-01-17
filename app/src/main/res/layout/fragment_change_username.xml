@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/add_course"
+    android:layout_width="300dip"
+    android:layout_height="100dip"
+    android:layout_gravity="center"
+    android:orientation="vertical"
+    app:theme="@style/AppTheme">
+
+    <EditText
+        android:id="@+id/change_username_username"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:hint="New Username"
+        android:imeOptions="actionDone"
+        android:inputType="text"
+        android:textColor="@color/colorAccent"
+        android:textColorHint="@color/colorAccent" />
+
+    <View
+        android:id="@+id/add_course_divider1"
+        android:layout_width="match_parent"
+        android:layout_height="1dip"
+        android:layout_below="@id/change_username_username"
+        android:layout_centerVertical="true"
+        android:background="@color/colorAccent" />
+
+
+    <View
+        android:id="@+id/add_course_divider2"
+        android:layout_width="1dip"
+        android:layout_height="35dip"
+        android:layout_below="@id/change_username_username"
+        android:layout_centerVertical="true"
+        android:layout_toEndOf="@id/change_username_username"
+        android:background="@color/colorAccent" />
+
+    <TextView
+        android:id="@+id/change_username_ok"
+        android:layout_width="125dip"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@+id/change_username_username"
+        android:layout_below="@+id/add_course_divider1"
+        android:layout_marginTop="5dp"
+        android:text="Ok"
+        android:textAlignment="center"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textColor="@color/colorAccent"
+        android:textSize="20sp" />
+
+    <TextView
+        android:id="@+id/change_username_cancel"
+        android:layout_width="125dip"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:layout_marginLeft="10dp"
+        android:text="Cancel"
+        android:layout_below="@id/add_course_divider1"
+        android:layout_toEndOf="@id/add_course_divider2"
+        android:textAlignment="center"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textColor="@color/colorAccent"
+        android:textSize="20sp" />
+</RelativeLayout>

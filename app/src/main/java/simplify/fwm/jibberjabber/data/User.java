@@ -7,20 +7,16 @@ public class User {
 
     private String firstName;
     private String lastName;
-    private String email;
-    private String password;
-    private String userName;
+    private String displayName;
 
     public User(){
 
     }
 
-    public User(String firstName, String lastName, String email, String userName, String password){
+    public User(String firstName, String lastName,String userName){
         this.firstName = firstName;
         this.lastName = lastName;
-        this.email = email;
-        this.password = password;
-        this.userName = userName;
+        this.displayName = userName;
 
     }
 
@@ -33,15 +29,22 @@ public class User {
         return lastName;
     }
 
-    public String getEmail(){
-        return email;
-    }
 
     public String getUserName(){
-        return userName;
+        return displayName;
     }
 
-    public String getPassword(){
-        return password;
+
+    //         Mutators
+    public void setFirstName(String firstName){
+        this.firstName = firstName;
+    }
+
+    public void setLastName(String lastName){
+        this.lastName = lastName;
+    }
+
+    public void setUserName(String userName){
+        this.displayName = userName;
     }
 }

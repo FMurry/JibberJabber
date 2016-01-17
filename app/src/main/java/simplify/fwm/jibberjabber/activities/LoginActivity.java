@@ -19,6 +19,9 @@ import com.firebase.client.AuthData;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import simplify.fwm.jibberjabber.R;
@@ -96,7 +99,7 @@ public class LoginActivity extends AppCompatActivity {
         String email = _email.getText().toString();
         String password = _password.getText().toString();
 
-        Firebase ref = new Firebase(FIREBASE_REF);
+        final Firebase ref = new Firebase(FIREBASE_REF);
 
         ref.authWithPassword(email, password, new Firebase.AuthResultHandler() {
             @Override
@@ -135,6 +138,7 @@ public class LoginActivity extends AppCompatActivity {
                 break;
             case R.id.login_signup:
                 startActivity(new Intent(this,SignupActivity.class));
+                finish();
                 break;
         }
     }
@@ -155,6 +159,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     public void loginSuccess(){
+        startActivity(new Intent(this,MainActivity.class));
         finish();
     }
 }
