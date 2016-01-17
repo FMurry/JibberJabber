@@ -24,6 +24,8 @@ import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
 
+import java.util.List;
+
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import simplify.fwm.jibberjabber.R;
@@ -34,6 +36,9 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
     private final Firebase ref = new Firebase("https://jibber-jabber.firebaseio.com/");
 
+    private List<User> users;
+
+    @Bind(R.id.main_recycler_view) RecyclerView _rv;
     @Bind(R.id.toolbar)Toolbar toolbar;
     @Bind(R.id.main_add)FloatingActionButton _addButton;
 
@@ -47,9 +52,11 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
         toolbar.setTitle("Jibber Jabber");
-        //_recycler.setHasFixedSize(true);
+        _rv.setHasFixedSize(true);
         rvLayout = new LinearLayoutManager(this);
-        //_recycler.setLayoutManager(rvLayout);
+        _rv.setLayoutManager(rvLayout);
+
+        //rvAdapter = new ;
 
         if(ref.getAuth()==null){
             startActivity(new Intent(this,LoginActivity.class));
@@ -71,13 +78,6 @@ public class MainActivity extends AppCompatActivity {
             });
         }
         setSupportActionBar(toolbar);
-        _addButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(getBaseContext(),"Hello",Toast.LENGTH_LONG).show();
-            }
-        });
-
     }
 
     @Override
@@ -96,7 +96,7 @@ public class MainActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_accout) {
             return true;
         }
 
@@ -110,6 +110,7 @@ public class MainActivity extends AppCompatActivity {
             FragmentManager fragmentManager = getSupportFragmentManager();
             ChangeUserDialog changeUserDialog = new ChangeUserDialog();
             changeUserDialog.show(fragmentManager,"fragment_change_username");
+            return true;
         }
 
         return super.onOptionsItemSelected(item);
@@ -117,7 +118,12 @@ public class MainActivity extends AppCompatActivity {
 
 
     public void MainOnClick(View v){
+        switch (v.getId()){
+            case R.id.main_add:
+                FragmentManager fragmentManager = getSupportFragmentManager();
 
+                break;
+        }
     }
 
     public boolean isConnected(){

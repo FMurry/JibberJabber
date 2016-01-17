@@ -2,18 +2,18 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/action_settings"
+        android:id="@+id/action_accout"
         android:orderInCategory="100"
-        android:title="@string/action_settings"
+        android:title="Account"
         app:showAsAction="never" />
     <item
         android:id="@+id/action_logout"
-        android:orderInCategory="200"
+        android:orderInCategory="300"
         android:title="Log out"
         />
 
     <item
         android:id="@+id/action_change_username"
-        android:orderInCategory="300"
+        android:orderInCategory="200"
         android:title="Change Username"/>
 </menu>

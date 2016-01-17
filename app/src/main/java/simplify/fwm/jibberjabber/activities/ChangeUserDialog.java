@@ -13,7 +13,11 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
+import com.firebase.client.Query;
+import com.firebase.client.ValueEventListener;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -30,6 +34,9 @@ public class ChangeUserDialog extends DialogFragment {
 
     private final Firebase ref = new Firebase("https://jibber-jabber.firebaseio.com/");
 
+    private String userName;
+    private boolean taken;
+
 
     public ChangeUserDialog(){
         //Empty constructor required for DialogFragment
@@ -40,7 +47,19 @@ public class ChangeUserDialog extends DialogFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v  = inflater.inflate(R.layout.fragment_change_username,container);
         ButterKnife.bind(this,v);
+        taken = false;
+        ref.child("users").child(ref.getAuth().getUid()).child("userName").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                String username = dataSnapshot.getValue().toString();
+                setUserName(username);
+            }
 
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+
+            }
+        });
         _ok.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -59,15 +78,44 @@ public class ChangeUserDialog extends DialogFragment {
         return v;
     }
 
+    public void setUserName(String name){
+        userName = name;
+    }
+
+    public void setTaken(boolean taken){
+        this.taken = taken;
+    }
     public void changeName(){
-        if(!(_input.getText().toString().isEmpty()) && (isConnected())){
+        Firebase list = ref.child("userNamesTaken");
+        list.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                //TODO: Fix User Search
+                setTaken(dataSnapshot.hasChild(_input.getText().toString()));
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+
+            }
+        });
+
+        if(!(_input.getText().toString().isEmpty()) && (isConnected()) && taken == false){
+            Firebase name = ref.child("userNamesTaken").child(userName);
+            name.setValue(null);
+
             Firebase userName = ref.child("users").child(ref.getAuth().getUid()).child("userName");
+
             userName.setValue(_input.getText().toString());
+            name = ref.child("userNamesTaken").child(_input.getText().toString());
+            name.setValue(true);
             close();
-            this.getActivity().recreate();
         }
         else if(!(isConnected())){
             Toast.makeText(getContext(),"No Connection",Toast.LENGTH_LONG).show();
+        }
+        else if(taken){
+            Toast.makeText(getContext(),"Username taken",Toast.LENGTH_LONG).show();
         }
         else{
             Toast.makeText(getContext(),"Enter new Username",Toast.LENGTH_LONG).show();
